@@ -8,8 +8,13 @@
 // @author       ggonmar@gmail.com
 // @match        https://www.youtube.com/*
 // @grant        GM_addStyle
-// @require      http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js// ==/UserScript==
-var active=false;
+// @grant       unsafeWindow
+// ==/UserScript==
+var active=true;
+
+
+let collapse_button = '<i class="fas fa-angle-double-up">Collapse</i>';
+let expand_button= 'Back!';
 
 Element.prototype.remove = function() {
     this.parentElement.removeChild(this);
@@ -23,30 +28,54 @@ NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
 }
 if(active)
 {
-    cleanUpYoutube();
-    setInterval(cleanUpYoutube, 2000);
+    setUpButton();
+    setInterval(setUpButton, 2000);
 }
 
-window.cleanUpYoutube = function cleanUpYoutube()
+function setUpButton()
 {
-    if(document.getElementById('things-cleant')) return;
+    if(document.getElementById('movie-mode')) return;
 
     try{
-        document.getElementById("container").remove();
-        document.getElementById("page-manager").setAttribute('style','margin-top:0px');
-        document.getElementById("primary")
-            .setAttribute('style','margin-left:5px; padding-top:5px; padding-right:5px');
-
-        var control = document.createElement("div");
-        control.setAttribute('id','things-cleant');
-        document.body.appendChild(control);
         var b = document.createElement("button");
         b.setAttribute('id','movie-mode');
-        b.innerHTML='Make Youtube Slim Again';
-        b.setAttribute('onclick', '"cleanUpYoutube()"');
+        b.innerHTML=collapse_button;
+        b.setAttribute('onclick', 'cleanShitUp()');
         document.getElementById("end").appendChild(b);
     }
     catch(e)
     {}
 }
 
+function cleanShitUp()
+{
+    try{
+
+        document.getElementById("container").remove();
+        document.getElementById("page-manager").setAttribute('style','margin-top:0px');
+        document.getElementById("primary")
+            .setAttribute('style','margin-left:5px; padding-top:5px; padding-right:5px');
+        var b = document.createElement("button");
+/*        b.setAttribute('id','movie-mode');
+        b.innerHTML=expand_button;
+        b.setAttribute('onclick', 'reload()');
+        document.getElementById("html5-video-container").appendChild(b);
+*/    }
+    catch(e)
+    {}
+}
+
+function reload()
+{
+    location.reload();
+}
+
+if(!unsafeWindow.cleanShitUp)
+{
+    unsafeWindow.cleanShitUp = cleanShitUp;
+}
+
+if(!unsafeWindow.reload)
+{
+    unsafeWindow.reload = reload;
+}
