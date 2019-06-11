@@ -3,7 +3,7 @@
 // @version      1.1
 // @description  Dudas de donde viene un gasto? busca información relacionada en Gmail y en GMaps!
 // @author       ggonmar@gmail.com
-// @match        https://www.fintonic.com/private/transactions
+// @match        https://www.fintonic.com/private/gtransactions
 // @grant        GM_addStyle
 // @grant       unsafeWindow
 // ==/UserScript==
