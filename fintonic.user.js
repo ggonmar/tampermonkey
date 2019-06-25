@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Fintonic To Gmail & GMaps
-// @version      1.2
+// @version      1.3
 // @description  Dudas de donde viene un gasto? busca información relacionada en Gmail y en GMaps!
 // @author       ggonmar@gmail.com
 // @match        https://www.fintonic.com/private/transactions
@@ -9,7 +9,8 @@
 // @grant       unsafeWindow
 // ==/UserScript==
 
-
+let gmail_icon="https://upload.wikimedia.org/wikipedia/commons/3/3d/Envelope_font_awesome.svg";
+let gmaps_icon="https://cdn.onlinewebfonts.com/svg/img_509390.png";
 let debug = false;
 let fontawesome = false;
 let checkevery = 2;
@@ -19,8 +20,8 @@ if (fontawesome) {
   GmailButton = `<button class='tm-button tm-gmail' title="Searh on GMail"><a href="${urlHolder}" target=_blank><i class="fas fa-envelope-open-text"></i></a></button>`;
   GMapsButton = `<button class='tm-button tm-gmaps' title="Search on Timeline"><a href="${urlHolder}" target=_blank><i class="fas fa-map-marked-alt"></i></a></button>`;
 } else {
-  GmailButton = `<button class='tm-button tm-gmail' title="Searh on GMail"><a href="${urlHolder}" target=_blank>Gmail</a></button>`;
-  GMapsButton = `<button class='tm-button tm-gmaps' title="Search on Timeline"><a href="${urlHolder}" target=_blank>Timeline</a></button>`;
+  GmailButton = `<a href="${urlHolder}" target=_blank><img src="${gmail_icon}" class="tm-gmail tm-button"></a>`;
+  GMapsButton = `<a href="${urlHolder}" target=_blank><img src="${gmaps_icon}" class="tm-gmaps tm-button"></a>`;
 }
 
 let n = 1;
@@ -57,6 +58,7 @@ function updateLinks() {
 function appendThisTo(what, where) {
   let div = document.createElement("div");
   div.innerHTML = what;
+  div.setAttribute('style', 'padding:5px !important');
   where.appendChild(div);
 }
 
@@ -103,7 +105,10 @@ function log(msg) {
 function addDependencies() {
   document.getElementsByTagName('head')[0].append('<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/themes/base/jquery-ui.css" rel="stylesheet" type="text/css">');
   let css = `
-  .tm-button{ font-size:12px;}
+  .tm-button{ font-size:12px; filter: invert(80%);}
+  .tm-gmail { width:15px; }
+  .tm-gmaps { width:15px; }
+  .tm-button:hover { filter: invert(0%); }
   `;
   GM_addStyle(css);
 }
