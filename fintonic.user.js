@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Fintonic To Gmail & GMaps
-// @version      1.3
+// @version      1.4
 // @description  Dudas de donde viene un gasto? busca información relacionada en Gmail y en GMaps!
 // @author       ggonmar@gmail.com
 // @match        https://www.fintonic.com/private/transactions
@@ -13,7 +13,7 @@ let gmail_icon="https://upload.wikimedia.org/wikipedia/commons/3/3d/Envelope_fon
 let gmaps_icon="https://cdn.onlinewebfonts.com/svg/img_509390.png";
 let debug = false;
 let fontawesome = false;
-let checkevery = 2;
+let checkevery = 1;
 let urlHolder = '%URL%';
 let GmailButton, GMapsButton;
 if (fontawesome) {
@@ -74,17 +74,33 @@ function hasButtons(line) {
 }
 
 function generateGmailUrl(date, value) {
-  let encodedValue = encodeURIComponent(value);
-  let encodedDate = encodeURIComponent(new Date(date).toISOString().split('T')[0].replace(/-/g, '/'));
-  encodedDate = encodeURIComponent(new Date(date).toLocaleString().split(", ")[0].replace(/([0-9]{2})\/([0-9]{2})\/([0-9]{4})/g, "$3/$2/$1"));
-  let url = `https://mail.google.com/mail/u/0/#advanced-search/subset=all&has=${encodedValue}&within=3d&sizeoperator=s_sl&sizeunit=s_smb&date=${encodedDate}&query=${encodedValue}`
-  log(`\t\tGmail Url: ${url}`);
+    let encodedValue;
+
+    if(value.includes(','))
+        encodedValue = `${encodeURIComponent(value)}+OR+${encodeURIComponent(value.replace(",","."))}`;
+    else
+        encodedValue = encodeURIComponent(value);
+
+//  let encodedDate = encodeURIComponent(new Date(date).toISOString().split('T')[0].replace(/-/g, '/'));
+  let from = offsetDate(date, -3);
+  let to = offsetDate(date, 3);
+  from = encodeURIComponent(from.toLocaleString().split(", ")[0].replace(/([0-9]*)\/([0-9]*)\/([0-9]*)/g, "$3/$2/$1"));
+  to = encodeURIComponent(to.toLocaleString().split(", ")[0].replace(/([0-9]*)\/([0-9]*)\/([0-9]*)/g, "$3/$2/$1"));
+  console.log(`${date} -> ${from} - ${to}`);
+  let url = `https://mail.google.com/mail/u/0/#search/(${encodedValue})+after%3A${from}+before%3A${to}`;
+  console.log(`\t\tGmail Url: ${url}`);
   return url;
 }
 
+function offsetDate(date, offset)
+{
+   let x = new Date(date);
+   x.setDate(x.getDate() + offset);
+   return x;
+}
 function generateGMapsUrl(date) {
   //let encodedDate = new Date(date).toISOString().split('T')[0];
-  let encodedDate = new Date(date).toLocaleString().split(", ")[0].replace(/([0-9]{2})\/([0-9]{2})\/([0-9]{4})/g, "$3-$2-$1");
+  let encodedDate = new Date(date).toLocaleString().split(", ")[0].replace(/([0-9]*)\/([0-9]*)\/([0-9]*)/g, "$3-$1-$2");
   let url = `https://www.google.com/maps/timeline?hl=en&authuser=0&ei=zTL6XJ_KBbTKgwfJuLWAAQ%3A15&ved=1t%3A17706&pb=!1m2!1m1!1s${encodedDate}`;
   log(`\t\tGMaps Url: ${url}`);
   return url;
