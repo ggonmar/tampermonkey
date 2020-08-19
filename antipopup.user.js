@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AntiPopup
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Quita el panel de antipopup de 20m, elpais, elmundo...
 // @updateURL	https://github.com/ggonmar/tampermonkey/raw/master/antipopup.user.js
 // @author       ggonmar@gmail.com
@@ -13,7 +13,7 @@
 // ==/UserScript==
 
 function removeLayer(){
-        console.log('Removing layers...');
+//        console.log('Removing layers...');
         jQuery('.fc-ab-root').remove();
         jQuery('body').css('overflow','')
     }
