@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      1.0
+// @version      1.2
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
+// @downloadURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
+// @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @author       Guillermo (ggonmar@gmail.com)
 // @include      https://mail.google.com/*
 // @grant        GM.xmlHttpRequest
@@ -11,26 +13,6 @@
 // @grant        GM.listValues
 // ==/UserScript==
 
-/*
-let goodLogo='https://www.flaticon.com/svg/static/icons/svg/281/281769.svg';
-let number = findCurrentUnread();
-
-let img = document.createElement("IMG");
-img.src=goodLogo;
-//document.getElementById('body').appendChild(img);
-
-function findCurrentUnread(){
-    var aTags = document.getElementsByTagName("div");
-    var found;
-    for (var i = 0; i < aTags.length; i++) {
-        if (aTags[i].textContent.includes("Inbox") && aTags[i].textContent.match(/^Inbox(\d)*$/g)) {
-            found = aTags[i].textContent.replace("Inbox", "");
-            break;
-        }
-    }
-    return found;
-}
-*/
 (async function () {
 
     let refNumberFormat = /\d{3}-\d{7}-\d{7}/g;
