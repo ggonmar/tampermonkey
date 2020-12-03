@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
 // @version      0.1
-// @description  try to take over the world!
+// @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @author       Guillermo (ggonmar@gmail.com)
 // @include      https://mail.google.com/*
 // @grant        GM.xmlHttpRequest
