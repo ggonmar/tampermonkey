@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AntiPopup
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Quita el panel de antipopup de 20m, elpais, elmundo...
 // @updateURL	https://github.com/ggonmar/tampermonkey/raw/master/antipopup.user.js
 // @author       ggonmar@gmail.com
 // @include      *20minutos.es/*
 // @include      *elmundo.com/*
 // @include      *elpais.com/*
+// @include      *abc.es/*
 // @require https://code.jquery.com/jquery-2.1.4.min.js
 // @grant        none
 // ==/UserScript==
