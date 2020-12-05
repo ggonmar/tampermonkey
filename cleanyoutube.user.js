@@ -4,7 +4,7 @@
 // @version      1.2
 // @description  Clean Youtube
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/cleanyoutube.user.js
-// @downloadURL    https://github.com/ggonmar/tampermonkey/raw/master/cleanyoutube.user.js
+// @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/cleanyoutube.user.js
 // @author       ggonmar@gmail.com
 // @match        https://www.youtube.com/*
 // @grant        GM_addStyle
