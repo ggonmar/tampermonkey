@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      1.5
+// @version      1.7
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -16,6 +16,8 @@
 (async function () {
 
     let refNumberFormat = /\d{3}-\d{7}-\d{7}/g;
+    let daysToStoreReferences = 7;
+    let debug=false;
 
     await untilGmailIsFullyLoaded();
 
@@ -49,7 +51,7 @@
 
     async function findCorrectValueForReference(ref) {
         let html = (await GM.getValue(ref, "")).code;
-        if (!html) {
+        if (!html || debug) {
             let webHTML = await GM.xmlHttpRequest({
                 method: 'GET',
                 url: `https://www.amazon.es/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
@@ -60,13 +62,15 @@
                 webHTML = (parser.parseFromString(webHTML.responseText.trim(), "text/html"))
                     .documentElement;
 
-                ['nav-belt', 'nav-main', 'nav-subnav', 'skiplink', 'recsWidget', 'navFooter']
+                ['nav-belt', 'nav-main', 'nav-subnav', 'skiplink', 'recsWidget', 'navFooter', 'orderDetails h1']
                     .forEach((e) => webHTML.querySelector(`#${e}`).remove());
-                [{nth: 0,  elem: 'breadcrumbs'}].forEach((e) => webHTML.querySelectorAll(`.${e.elem}`)[e.nth].remove());
+                [{nth: 0,  elem: 'breadcrumbs'}, {nth: 0,  elem: 'hide-if-js'}].forEach((e) => webHTML.querySelectorAll(`.${e.elem}`)[e.nth].remove());
+
+                webHTML.querySelector(`#a-popover-invoiceLinks`).parentNode.remove()
 
                 webHTML.querySelector('#orderDetails').style.width="90%";
                 let now =new Date();
-                let expiryDate = new Date(now.setMonth(now.getMonth()+1));
+                let expiryDate = new Date(now.setDate(now.getDate()+daysToStoreReferences));
 
                 await GM.setValue(ref, {code: webHTML.outerHTML, expiry: expiryDate});
                 html = webHTML.outerHTML;
@@ -78,17 +82,23 @@
     async function populateDivWithCorrectData(information) {
         let referenceNumber = information.innerText.match(refNumberFormat)[0];
         let div = document.querySelector('#amazon-info');
-        div.innerHTML = `<div>${spinner}</div><div style="width:100%;text-align:center">Loading information for ${referenceNumber}</div>`;
-//        console.log(information);
         div.style.display = "";
         div.style.top = `${getElemDistanceToTop(information) + information.offsetHeight + 5}px`;
         div.style.left = `${getElemDistanceToLeft(information) + 25}px`;
-
         while (window.innerWidth - div.getBoundingClientRect().right < 100) {
             div.style.left = `${(parseFloat(div.style.left) - 5)}px`;
         }
 
-        div.innerHTML = await findCorrectValueForReference(referenceNumber);
+        let existingContent = document.querySelector('#amazon-info-content');
+        if(existingContent) existingContent.remove();
+
+        let content=document.createElement('div');
+        content.id='amazon-info-content';
+        content.style.cssText = "margin-top:-1.5em;";
+        content.innerHTML = `<div>${spinner}</div><div style="width:100%;text-align:center">Loading information for ${referenceNumber}</div>`;
+//        console.log(information);
+        div.appendChild(content);
+        content.innerHTML = await findCorrectValueForReference(referenceNumber);
     }
 
     let getElemDistanceToTop = function (elem) {
@@ -120,10 +130,12 @@
         }
     }
 
-    function clearUp() {
+    function clearUp(force=false) {
         let div = document.querySelector('#amazon-info');
+        let content=document.querySelector('#amazon-info-content');
+        if(debug && !force) return;
         div.style.display = "none";
-        div.innerHTML = "";
+        content.remove();
     }
 
     async function untilGmailIsFullyLoaded() {
@@ -137,12 +149,21 @@
     function attachPanel() {
         let elem = document.createElement('div');
         elem.id = "amazon-info";
-        elem.style.cssText = 'display:none;position:absolute;top:100px;left:10%;width:60%;height:80%;opacity:0.92;border:5px outset grey; z-index:100;background:#fff';
-        elem.innerHTML = "Information goes here";
+        elem.style.cssText = 'display:none;position:absolute;top:100px;left:10%;width:60%;max-height:60%; overflow-y: auto;opacity:0.92;border:5px outset grey; z-index:100;background:#fff';
+        elem.innerHTML = "";
         elem.onmouseout = function () {
             clearUp();
         }
+        let close=document.createElement('div');
+        close.id="amazom-info-close";
+        close.style.cssText='position:absolute;top:10px;right:20px;cursor:pointer';
+        close.innerText='x';
+        close.onclick=function(){
+            clearUp(true);
+        }
+        elem.appendChild(close);
         document.body.appendChild(elem);
+
         cleanUpExpiredEntriesInStorage().then();
     }
 
@@ -158,7 +179,7 @@
         }
     }
 
-    let spinner = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:#fff;display:block;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+    let spinner = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;margin-top:2em;background:#fff;display:block;" width="100px" height="100px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
 <g transform="rotate(0 50 50)">
   <rect x="47" y="24" rx="2.4" ry="2.4" width="6" height="12" fill="#008ce3">
     <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s" repeatCount="indefinite"></animate>
