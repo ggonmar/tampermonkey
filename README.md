@@ -9,4 +9,7 @@ In order to benefit from these tools, do install the extension on your favorite 
 Receiving a bunch of amazon emails with reference numbers on them, but no other way of identifying what is that email relating to? Tired of accessing amazon with that reference number every time you want to figure out what you will be receiving today?
 
 Then install this script from this repo. You will have a display of the products related to any reference number shown on gmail as soon as you hover on them.
+[Link](https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js)
+
+#### Screenshot
 
