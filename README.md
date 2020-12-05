@@ -1,9 +1,13 @@
-# Tampermonkey Random Tools
+# Tampermonkey Tools
 All the scripts within this repository are improvements aspiring for a better web, implemented on the shape of addon scripts injected on to webs by means of [Tampermonkey](https://en.wikipedia.org/wiki/Tampermonkey).
 In order to benefit from these tools, do install the extension on your favorite browser:
  - Chrome: [Install Link](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en)
  - Firefox: [Install Link](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
  - Edge: [Install Link](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
+ 
+ This is among my first projects that I upload, and it'd be a great ego boost if you click that pretty Star button up on the top right part of the project: that'll mean that there's someone out there who found these things useful, fun or interesting.
+ 
+ Without further due, these are the scripts that I offer:
 
 ## Show Amazon content on Gmail (based on Reference Numbers)
 Receiving a bunch of amazon emails with reference numbers on them, but no other way of identifying what is that email relating to? Tired of accessing amazon with that reference number every time you want to figure out what you will be receiving today?
