@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      1.8
+// @version      1.9
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -11,6 +11,7 @@
 // @grant        GM.getValue
 // @grant        GM.deleteValue
 // @grant        GM.listValues
+// @grant        GM_registerMenuCommand
 // ==/UserScript==
 
 (async function () {
@@ -134,7 +135,7 @@
         let div = document.querySelector('#amazon-info');
         let content=document.querySelector('#amazon-info-content');
         if(debug && !force) return;
-        if(div.offsetHeight < content.offsetHeight && !force) return; 
+        if(div.offsetHeight+10 < content.offsetHeight && !force) return; 
         div.style.display = "none";
         content.remove();
     }
@@ -150,7 +151,7 @@
     function attachPanel() {
         let elem = document.createElement('div');
         elem.id = "amazon-info";
-        elem.style.cssText = 'display:none;position:absolute;top:100px;left:10%;width:60%;max-height:60%; overflow-y: auto;opacity:0.92;border:5px outset grey; z-index:100;background:#fff';
+        elem.style.cssText = 'display:none;position:absolute;top:100px;left:10%;width:60%;max-height:65%; overflow-y: auto;opacity:0.92;border:5px outset grey; z-index:100;background:#fff';
         elem.innerHTML = "";
         let close=document.createElement('div');
         close.id="amazom-info-close";
@@ -163,6 +164,8 @@
         document.body.appendChild(elem);
 
         cleanUpExpiredEntriesInStorage().then();
+
+        GM_registerMenuCommand("Remove stored reference numbers", cleanUpStorage, "R");
     }
 
     async function cleanUpExpiredEntriesInStorage(){
@@ -175,6 +178,12 @@
             if(now < expiryDate)
                 GM.deleteValue(entry);
         }
+    }
+
+    async function cleanUpStorage(){
+      let storedValues= await GM.listValues();
+      for (const entry of storedValues)
+            GM.deleteValue(entry);
     }
 
     let spinner = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;margin-top:2em;background:#fff;display:block;" width="100px" height="100px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
