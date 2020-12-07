@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      1.7
+// @version      1.8
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
