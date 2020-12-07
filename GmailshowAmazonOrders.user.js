@@ -134,6 +134,7 @@
         let div = document.querySelector('#amazon-info');
         let content=document.querySelector('#amazon-info-content');
         if(debug && !force) return;
+        if(div.offsetHeight < content.offsetHeight && !force) return; 
         div.style.display = "none";
         content.remove();
     }
@@ -151,9 +152,6 @@
         elem.id = "amazon-info";
         elem.style.cssText = 'display:none;position:absolute;top:100px;left:10%;width:60%;max-height:60%; overflow-y: auto;opacity:0.92;border:5px outset grey; z-index:100;background:#fff';
         elem.innerHTML = "";
-        elem.onmouseout = function () {
-            clearUp();
-        }
         let close=document.createElement('div');
         close.id="amazom-info-close";
         close.style.cssText='position:absolute;top:10px;right:20px;cursor:pointer';
