@@ -29,7 +29,7 @@ Supported pages:
 
 [Link](https://github.com/ggonmar/tampermonkey/raw/master/antipopup.user.js)
 
-#### Screenshot
+![](src/cleanNews.gif)
 
 ---
 
@@ -40,7 +40,8 @@ This script provides with an extra button on Youtube to remove everything betwee
 
 [Link](https://github.com/ggonmar/tampermonkey/raw/master/cleanyoutube.user.js)
 
-#### Screenshot
+![](src/cleanYoutube.gif)
+
 
 ---
 
