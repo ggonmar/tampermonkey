@@ -16,8 +16,7 @@ Then install this script from this repo. You will have a display of the products
 
 [Link](https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js)
 
-#### Screenshot
-
+![](src/amazon2gmail.gif)
 ---
 ## Noticias Anti Popup
 Reading the news in spanish newspapers is a complete pain, constantly asking you to disable AdBlock or asking you to log in.
