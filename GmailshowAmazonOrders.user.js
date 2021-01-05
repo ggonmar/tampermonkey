@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      1.9
+// @version      2.1
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -19,77 +19,107 @@
     let refNumberFormat = /\d{3}-\d{7}-\d{7}/g;
     let daysToStoreReferences = 7;
     let debug=false;
+    let sticky=false;
+    let amazonInstance = await GM.getValue('AmazonInstance');
+    if(!amazonInstance) amazonInstance="es";
 
     await untilGmailIsFullyLoaded();
 
     attachPanel();
     setInterval(lookForAmazonReferences, 200);
-
+    window.onhashchange = function() {
+        console.log("hash change")
+        clearUp(true);
+    }
 
     function lookForAmazonReferences() {
-        let amazonReferences = Array.from(document.querySelectorAll('a,h2')).filter(e => {
+        if(window.location.href.endsWith("#inbox")) return;
+        let amazonReferences = Array.from(document.querySelectorAll('a,h2,span')).filter(e => {
             return e.innerText.match(refNumberFormat)
         });
         if (amazonReferences.length) {
             amazonReferences.forEach(e => {
                 if (!e.onmouseover)
-                    addEventOn(e)
+                    addEventOn(e);
             });
         }
     }
 
     function addEventOn(element) {
-
         element.onmouseover = async function () {
             this.style.cursor = "help";
             await populateDivWithCorrectData(this);
         };
         element.onmouseout = function () {
-            emptyDivAndHide(this);
+            if(!sticky)
+                emptyDivAndHide(this);
         };
-
+        element.onclick = function(){
+            makeSticky(this);
+        }
     }
 
-    async function findCorrectValueForReference(ref) {
+    function makeSticky(element){
+        let div = document.querySelector('#amazon-info');
+        if(div.style.display == "")
+            sticky = true;
+    }
+
+    async function composeContentForReference(ref) {
         let html = (await GM.getValue(ref, "")).code;
         if (!html || debug) {
             let webHTML = await GM.xmlHttpRequest({
                 method: 'GET',
-                url: `https://www.amazon.es/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
+                url: `https://www.amazon.${amazonInstance}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
             });
 
             if (webHTML.status == 200) {
+                // Starting the process of cleaning up the page to be properly displayed
                 let parser = new DOMParser();
                 webHTML = (parser.parseFromString(webHTML.responseText.trim(), "text/html"))
                     .documentElement;
+                try{
+                    ['nav-belt', 'nav-main', 'nav-subnav', 'skiplink', 'recsWidget', 'navFooter', 'orderDetails h1']
+                        .forEach((e) => {
+                            if(webHTML.querySelector(`#${e}`))
+                                webHTML.querySelector(`#${e}`).remove()
+                        });
+                    [{elem: 'breadcrumbs', nth: 0,}, {elem: 'hide-if-js', nth: 0,}, {elem: 'a-last', nth: 0,}]
+                            .forEach((e) => {
+                                if(webHTML.querySelectorAll(`.${e.elem}`).length > e.nth)
+                                    webHTML.querySelectorAll(`.${e.elem}`)[e.nth].remove()
+                            });
 
-                ['nav-belt', 'nav-main', 'nav-subnav', 'skiplink', 'recsWidget', 'navFooter', 'orderDetails h1']
-                    .forEach((e) => webHTML.querySelector(`#${e}`).remove());
-                [{nth: 0,  elem: 'breadcrumbs'}, {nth: 0,  elem: 'hide-if-js'}].forEach((e) => webHTML.querySelectorAll(`.${e.elem}`)[e.nth].remove());
+                    if(webHTML.querySelector(`#a-popover-invoiceLinks`))
+                        webHTML.querySelector(`#a-popover-invoiceLinks`).parentNode.remove()
 
-                webHTML.querySelector(`#a-popover-invoiceLinks`).parentNode.remove()
+                    webHTML.querySelector('#orderDetails').style.width="90%";
+                    html = webHTML.outerHTML;
+                    let now =new Date();
+                    let expiryDate = new Date(now.setDate(now.getDate()+daysToStoreReferences));
+                    await GM.setValue(ref, {code: html, expiry: expiryDate});
+                }
+                catch(e){
+                    html = webHTML.outerHTML;
+                }
 
-                webHTML.querySelector('#orderDetails').style.width="90%";
-                let now =new Date();
-                let expiryDate = new Date(now.setDate(now.getDate()+daysToStoreReferences));
-
-                await GM.setValue(ref, {code: webHTML.outerHTML, expiry: expiryDate});
-                html = webHTML.outerHTML;
             }
         }
-        return html;
+
+        let parser = new DOMParser();
+        let webHTML = (parser.parseFromString(html, "text/html")).documentElement;
+        for(let elem of webHTML.querySelectorAll('[href]'))
+        {
+            if(elem.getAttribute('href')[0] === "/")
+                elem.setAttribute('href', `https://www.amazon.${amazonInstance}${elem.getAttribute('href')}`);
+        }
+
+        return webHTML.outerHTML;
     }
 
     async function populateDivWithCorrectData(information) {
         let referenceNumber = information.innerText.match(refNumberFormat)[0];
         let div = document.querySelector('#amazon-info');
-        div.style.display = "";
-        div.style.top = `${getElemDistanceToTop(information) + information.offsetHeight + 5}px`;
-        div.style.left = `${getElemDistanceToLeft(information) + 25}px`;
-        while (window.innerWidth - div.getBoundingClientRect().right < 100) {
-            div.style.left = `${(parseFloat(div.style.left) - 5)}px`;
-        }
-
         let existingContent = document.querySelector('#amazon-info-content');
         if(existingContent) existingContent.remove();
 
@@ -99,7 +129,23 @@
         content.innerHTML = `<div>${spinner}</div><div style="width:100%;text-align:center">Loading information for ${referenceNumber}</div>`;
 //        console.log(information);
         div.appendChild(content);
-        content.innerHTML = await findCorrectValueForReference(referenceNumber);
+
+        div.style.display = "";
+        div.style.top = getElemDistanceToTop(information) < window.innerHeight/2 ?
+            `${getElemDistanceToTop(information) + information.offsetHeight + 5}px`
+            :
+            `${getElemDistanceToTop(information) - div.offsetHeight - information.offsetHeight}px`
+        div.style.left = `${getElemDistanceToLeft(information) + 25}px`;
+        while (window.innerWidth - div.getBoundingClientRect().right < 100) {
+            div.style.left = `${(parseFloat(div.style.left) - 5)}px`;
+        }
+
+        content.innerHTML = await composeContentForReference(referenceNumber);
+
+        while (window.innerHeight - div.getBoundingClientRect().bottom < 100) {
+            div.style.top = `${(parseFloat(div.style.top) - 5)}px`;
+        }
+
     }
 
     let getElemDistanceToTop = function (elem) {
@@ -134,8 +180,8 @@
     function clearUp(force=false) {
         let div = document.querySelector('#amazon-info');
         let content=document.querySelector('#amazon-info-content');
-        if(debug && !force) return;
-        if(div.offsetHeight+10 < content.offsetHeight && !force) return; 
+        if((debug || sticky) && !force) return;
+        if(div.offsetHeight+10 < content.offsetHeight && !force) return;
         div.style.display = "none";
         content.remove();
     }
@@ -158,6 +204,7 @@
         close.style.cssText='position:absolute;top:10px;right:20px;cursor:pointer';
         close.innerText='x';
         close.onclick=function(){
+            sticky = false;
             clearUp(true);
         }
         elem.appendChild(close);
@@ -166,24 +213,53 @@
         cleanUpExpiredEntriesInStorage().then();
 
         GM_registerMenuCommand("Remove stored reference numbers", cleanUpStorage, "R");
+        GM_registerMenuCommand(`Change Amazon Instance (${amazonInstance})`, changeAmazonInstance, "C");
+
     }
 
     async function cleanUpExpiredEntriesInStorage(){
-        let storedValues= await GM.listValues();
-
+        let storedValues= (await GM.listValues()).filter(e => e != "AmazonInstance");
         let now = new Date();
         for (const entry of storedValues) {
             let entryValue = await GM.getValue(entry);
             let expiryDate = new Date(entryValue.expiry);
-            if(now < expiryDate)
+            if(now > expiryDate)
                 GM.deleteValue(entry);
         }
     }
 
     async function cleanUpStorage(){
-      let storedValues= await GM.listValues();
-      for (const entry of storedValues)
-            GM.deleteValue(entry);
+      let storedValues= (await GM.listValues()).filter(e => e != "AmazonInstance");
+      for (const entry of storedValues) {
+          GM.deleteValue(entry);
+      }
+    }
+
+    async function changeAmazonInstance(){
+        let option;
+        let continueOnLoop=false;
+        do{
+            let str="What amazon domain would you like to launch queries against?";
+            if(option != undefined) str += `\nThe domain "amazon.${option}" is invalid.`;
+            option=window.prompt(str);
+            console.log(option);
+            continueOnLoop = !(option==null || option.length == 0 || verifyValidAmazonDomain(option));
+        }while(continueOnLoop)
+        if(option){
+            await GM.setValue('AmazonInstance', option)
+            location.reload()
+        }
+    }
+
+    function verifyValidAmazonDomain(domain){
+        if(domain == "es" || domain == "it")
+            return true;
+        else
+            return false;
+        let webHTML = GM.xmlHttpRequest({
+            method: 'GET',
+            url: `https://www.amazon.${amazonInstance}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
+        }).then(e => {return e});
     }
 
     let spinner = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;margin-top:2em;background:#fff;display:block;" width="100px" height="100px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
