@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      2.1
+// @version      2.2
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -28,7 +28,6 @@
     attachPanel();
     setInterval(lookForAmazonReferences, 200);
     window.onhashchange = function() {
-        console.log("hash change")
         clearUp(true);
     }
 
@@ -61,6 +60,11 @@
 
     function makeSticky(element){
         let div = document.querySelector('#amazon-info');
+        if(div.style.display =="" && sticky ==true){
+            sticky=false;
+            clearUp(true);
+            return;
+        }
         if(div.style.display == "")
             sticky = true;
     }
@@ -180,6 +184,7 @@
     function clearUp(force=false) {
         let div = document.querySelector('#amazon-info');
         let content=document.querySelector('#amazon-info-content');
+        if(div.style.display =="none") return;
         if((debug || sticky) && !force) return;
         if(div.offsetHeight+10 < content.offsetHeight && !force) return;
         div.style.display = "none";
