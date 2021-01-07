@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      2.2
+// @version      2.5
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -33,6 +33,7 @@
 
     function lookForAmazonReferences() {
         if(window.location.href.endsWith("#inbox")) return;
+
         let amazonReferences = Array.from(document.querySelectorAll('a,h2,span')).filter(e => {
             return e.innerText.match(refNumberFormat)
         });
