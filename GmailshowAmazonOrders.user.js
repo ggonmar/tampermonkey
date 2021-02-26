@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      2.7
+// @version      2.8
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -148,7 +148,7 @@
             div.style.top = `${(parseFloat(div.style.top) - 5)}px`;
         }
 
-        while (div.scrollHeight > div.clientHeight) {
+        while (div.scrollHeight >= div.clientHeight+5) {
             if (div.style.zoom === "")
                 div.style.zoom = "0.99";
             else {
