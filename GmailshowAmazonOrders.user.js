@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      3.1
+// @version      3.2
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -38,14 +38,14 @@
             return e.innerText.match(refNumberFormat)
         });
         if (amazonReferences.length) {
-            amazonReferences.forEach(e => {
-                if (!e.onmouseover)
-                    addEventOn(e);
+            amazonReferences.forEach(reference => {
+                if (!reference.onmouseover)
+                    setDynamicsForFoundReference(reference);
             });
         }
     }
 
-    function addEventOn(element) {
+    function setDynamicsForFoundReference(element) {
         element.onmouseover = async function () {
             this.style.cursor = "help";
             await populateDivWithCorrectData(this);
@@ -148,7 +148,7 @@
             div.style.top = `${(parseFloat(div.style.top) - 5)}px`;
         }
 
-        while (div.scrollHeight >= div.clientHeight+5) {
+        while (div.scrollHeight > div.clientHeight) {
             if (div.style.zoom === "")
                 div.style.zoom = "0.99";
             else {
@@ -157,6 +157,14 @@
                 div.style.zoom = `${newZoom}`;
             }
         }
+
+        let hidePanel = function(){
+            try{
+                clearUp(true);
+                document.removeEventListener("click", hidePanel);
+            }catch(e){}
+        }
+        document.addEventListener("click", hidePanel);
     }
 
     let getElemDistanceToTop = function (elem) {
