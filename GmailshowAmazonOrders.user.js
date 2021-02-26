@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      3.2
+// @version      3.3
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -144,27 +144,32 @@
         }
         content.innerHTML = await composeContentForReference(referenceNumber);
 
-        while (window.innerHeight - div.getBoundingClientRect().bottom < 100) {
-            div.style.top = `${(parseFloat(div.style.top) - 5)}px`;
-        }
-
-        while (div.scrollHeight > div.clientHeight) {
-            if (div.style.zoom === "")
-                div.style.zoom = "0.99";
-            else {
-                let newZoom;
-                newZoom = parseFloat(div.style.zoom) - 0.01;
-                div.style.zoom = `${newZoom}`;
+        setTimeout(function() {
+            while (window.innerHeight - div.getBoundingClientRect().bottom < 100) {
+                div.style.top = `${(parseFloat(div.style.top) - 5)}px`;
             }
-        }
 
-        let hidePanel = function(){
-            try{
-                clearUp(true);
-                document.removeEventListener("click", hidePanel);
-            }catch(e){}
-        }
-        document.addEventListener("click", hidePanel);
+            // TODO: control resizeObserver following the resizeObserver option
+            // https://stackoverflow.com/questions/15875128/is-there-element-rendered-event
+
+            while (div.scrollHeight > div.clientHeight) {
+                if (div.style.zoom === "")
+                    div.style.zoom = "0.99";
+                else {
+                    let newZoom;
+                    newZoom = parseFloat(div.style.zoom) - 0.01;
+                    div.style.zoom = `${newZoom}`;
+                }
+            }
+
+            let hidePanel = function(){
+                try{
+                    clearUp(true);
+                    document.removeEventListener("click", hidePanel);
+                }catch(e){}
+            }
+            document.addEventListener("click", hidePanel);
+         }, 100);
     }
 
     let getElemDistanceToTop = function (elem) {
