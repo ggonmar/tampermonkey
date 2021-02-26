@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Gmail show Amazon orders
-// @version      2.8
+// @version      3.0
 // @description  Isn't it annoying to have to switch context between gmail and amazon every time? This will solve it for you. https://twitter.com/ggonmar/status/1334461580759740416
 // @updateURL    https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
 // @downloadURL  https://github.com/ggonmar/tampermonkey/raw/master/GmailshowAmazonOrders.user.js
@@ -59,14 +59,14 @@
         }
     }
 
-    function makeSticky(element) {
+    function makeSticky() {
         let div = document.querySelector('#amazon-info');
-        if (div.style.display == "" && sticky == true) {
+        if (div.style.display === "" && sticky === true) {
             sticky = false;
             clearUp(true);
             return;
         }
-        if (div.style.display == "")
+        if (div.style.display === "")
             sticky = true;
     }
 
@@ -78,7 +78,7 @@
                 url: `https://www.amazon.${amazonInstance}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
             });
 
-            if (webHTML.status == 200) {
+            if (webHTML.status === 200) {
                 // Starting the process of cleaning up the page to be properly displayed
                 let parser = new DOMParser();
                 webHTML = (parser.parseFromString(webHTML.responseText.trim(), "text/html"))
@@ -152,7 +152,8 @@
             if (div.style.zoom === "")
                 div.style.zoom = "0.99";
             else {
-                let newZoom = parseFloat(div.style.zoom) - 0.01;
+                let newZoom;
+                newZoom = parseFloat(div.style.zoom) - 0.01;
                 div.style.zoom = `${newZoom}`;
             }
         }
@@ -182,7 +183,7 @@
     function emptyDivAndHide(elem) {
         let currently = document.querySelectorAll(":hover");
         elem.style.cursor = "auto";
-        if (!Array.from(currently).some(e => e.id == "amazon-info")) {
+        if (!Array.from(currently).some(e => e.id === "amazon-info")) {
             clearUp();
         }
     }
@@ -190,7 +191,7 @@
     function clearUp(force = false) {
         let div = document.querySelector('#amazon-info');
         let content = document.querySelector('#amazon-info-content');
-        if (div.style.display == "none") return;
+        if (div.style.display === "none") return;
         if ((debug || sticky) && !force) return;
         div.style.display = "none";
         content.remove();
@@ -228,7 +229,7 @@
     }
 
     async function cleanUpExpiredEntriesInStorage() {
-        let storedValues = (await GM.listValues()).filter(e => e != "AmazonInstance");
+        let storedValues = (await GM.listValues()).filter(e => e !== "AmazonInstance");
         let now = new Date();
         for (const entry of storedValues) {
             let entryValue = await GM.getValue(entry);
@@ -239,7 +240,7 @@
     }
 
     async function cleanUpStorage() {
-        let storedValues = (await GM.listValues()).filter(e => e != "AmazonInstance");
+        let storedValues = (await GM.listValues()).filter(e => e !== "AmazonInstance");
         for (const entry of storedValues) {
             GM.deleteValue(entry);
         }
@@ -250,10 +251,10 @@
         let continueOnLoop = false;
         do {
             let str = "What amazon domain would you like to launch queries against?";
-            if (option != undefined) str += `\nThe domain "amazon.${option}" is invalid.`;
+            if (option !== undefined) str += `\nThe domain "amazon.${option}" is invalid.`;
             option = window.prompt(str);
             console.log(option);
-            continueOnLoop = !(option == null || option.length == 0 || verifyValidAmazonDomain(option));
+            continueOnLoop = !(option === null || option.length === 0 || verifyValidAmazonDomain(option));
         } while (continueOnLoop)
         if (option) {
             await GM.setValue('AmazonInstance', option)
@@ -262,16 +263,15 @@
     }
 
     function verifyValidAmazonDomain(domain) {
-        if (domain == "es" || domain == "it")
-            return true;
-        else
-            return false;
-        let webHTML = GM.xmlHttpRequest({
+        return domain === "es" || domain === "it";
+/*        let webHTML = GM.xmlHttpRequest({
             method: 'GET',
             url: `https://www.amazon.${amazonInstance}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${ref}#orderDetails`
         }).then(e => {
             return e
         });
+        return webHTML;
+*/
     }
 
     let spinner = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;margin-top:2em;background:#fff;display:block;" width="100px" height="100px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
