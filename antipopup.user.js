@@ -8,6 +8,7 @@
 // @author       ggonmar@gmail.com
 // @include      *20minutos.es/*
 // @include      *elmundo.com/*
+// @include      *elmundo.es/*
 // @include      *elpais.com/*
 // @include      *abc.es/*
 // @require https://code.jquery.com/jquery-2.1.4.min.js
