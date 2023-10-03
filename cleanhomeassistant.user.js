@@ -16,9 +16,8 @@ const interval = setInterval(function() {
         .shadowRoot.querySelector("ha-top-app-bar-fixed > ha-config-section > ha-card:nth-child(2) > ha-config-navigation")
         .shadowRoot.querySelector("ha-navigation-list").shadowRoot.querySelector("mwc-list > ha-list-item:nth-child(1)")
     if (elem.innerText == 'Home Assistant Cloud Control home when away and integrate with Alexa and Google Assistant'){
-        elem.remove()
-        clearInterval(interval)
+        elem.style.cssText='height:0px'
     }
-}, 100);
+}, 1000);
 
 })();
