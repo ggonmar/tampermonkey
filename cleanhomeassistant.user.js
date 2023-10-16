@@ -2,7 +2,7 @@
 // @name         Remove HA Cloud
 // @version      0.2
 // @author       Guille
-// @include       /.*:8123/config/dashboard$
+// @include       /.*:8123*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=homeassistant.local
 // @grant        none
 // ==/UserScript==
